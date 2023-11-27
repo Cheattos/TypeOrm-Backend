@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne, JoinColumn } from "typeorm"
 import { UserEntity } from "./UserEntity"
 import { PaslonEntity } from "./PaslonEntity"
 
@@ -31,7 +31,7 @@ export class VoterEntity {
     @JoinColumn()
     voter: UserEntity
 
-    @OneToOne(() => PaslonEntity, (paslon) => paslon.voter, {
+    @ManyToOne(() => PaslonEntity, (paslon) => paslon.voter, {
         onUpdate: "CASCADE",
         onDelete: "CASCADE"
     })

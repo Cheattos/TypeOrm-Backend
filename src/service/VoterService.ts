@@ -20,15 +20,15 @@ export default new class VoterSrvice {
         try {
 
             const voteCounts = await this.VoterRepository.query(`
-                SELECT votepaslon, COUNT(*) as count
-                FROM voter
-                GROUP BY votepaslon
+                SELECT votepaslonPaslonId, COUNT(*) as count
+                FROM voter_entity
+                GROUP BY votepaslonPaslonId
             `);
 
             const Voterfind = await this.VoterRepository.find({ relations: ['voter', 'votepaslon'] });
             return res.status(200).json({Voterfind, voteCounts})
-        } catch (err) {
-            return res.status(500).json({ massage: "error while find data" });
+        } catch (error) {
+            return res.status(500).json({error:error});
         }
     }
 
@@ -116,9 +116,25 @@ export default new class VoterSrvice {
                 return res.status(400).json({ error: error });
             }
 
+            const selectedUser = await this.UserRepository.findOne({ where: { user_fullname: data.voter_name } });
+
+            if (!selectedUser) {
+                return res.status(400).json({ error: "User not found" });
+            }
+
+            const existingPaslon = await this.PaslonRepository.findOne({
+                where: { paslon_name: data.votepaslon },
+            });
+
+            if (!existingPaslon) {
+                return res.status(400).json({ error: "Paslon tidak ada" });
+            }
+
             existingVoter.voter_name = data.voter_name;
             existingVoter.voter_address = data.voter_address;
             existingVoter.voter_gender = data.voter_gender;
+            existingVoter.voter = selectedUser;
+            existingVoter.votepaslon = existingPaslon;
 
             const updateVoter = await this.VoterRepository.save(existingVoter);
 
